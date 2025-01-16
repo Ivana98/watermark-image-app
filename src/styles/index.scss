@@ -1,62 +1,98 @@
-    html {
-        font-family: 'Inter', sans-serif;
-    }
+html {
+  font-family: 'Inter', sans-serif;
+}
 
-    html,
-    body {
-        @apply h-full;
-    }
+html,
+body {
+  @apply h-full;
+}
 
-    body {
-        @apply m-0;
-    }
+body {
+  @apply m-0;
+}
 
-    * {
-        box-sizing: border-box;
-        font-family: 'Inter', sans-serif;
-    }
+* {
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
 
-    a:active,
-    a:focus,
-    button:active,
-    button:focus {
-        outline: none;
-        /* stylelint-disable-line */
-    }
+a:active,
+a:focus,
+button:active,
+button:focus {
+  outline: none;
+  /* stylelint-disable-line */
+}
 
-    input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button {
-        margin: 0;
-        appearance: none;
-    }
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  margin: 0;
+  appearance: none;
+}
 
-    input[type='number'] {
-        appearance: textfield;
-    }
+input[type='number'] {
+  appearance: textfield;
+}
 
-    .scrollbar-thin {
-        scrollbar-width: thin;
-    }
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
 
-    .smooth-scroll {
-        -webkit-overflow-scrolling: touch;
-    }
+.smooth-scroll {
+  -webkit-overflow-scrolling: touch;
+}
 
-    ::-webkit-scrollbar {
-        @apply w-1.5;
-        @apply h-1.5;
-        @apply px-1 py-2;
+::-webkit-scrollbar {
+  @apply w-1.5;
+  @apply h-1.5;
+  @apply px-1 py-2;
 
-        @apply rounded-lg;
-    }
+  @apply rounded-lg;
+}
 
-    ::-webkit-scrollbar-track {
-        @apply my-1;
-    }
+::-webkit-scrollbar-track {
+  @apply my-1;
+}
 
-    /* Handle */
-    ::-webkit-scrollbar-thumb {
-        @apply bg-slate-400;
-        @apply rounded-lg;
-        padding-right: 16px;
-    }
+::-webkit-scrollbar-thumb {
+  @apply bg-zinc-300;
+  @apply rounded-lg;
+  padding-right: 16px;
+}
+
+/* Override Chrome default behavior */
+input:-webkit-autofill {
+  background-color: transparent !important;
+  -webkit-text-fill-color: #52525b !important; /* Ensures text color matches design */
+  transition: background-color 5000s ease-in-out 0s, -webkit-text-fill-color 5000s ease-in-out 0s;
+}
+
+/* Loader */
+.loader {
+  width: 50px;
+  aspect-ratio: 1;
+  display: grid;
+  border: 4px solid #0000;
+  border-radius: 50%;
+  border-right-color: #3b82f6;
+  animation: l15 2s infinite linear;
+}
+.loader::before,
+.loader::after {    
+  content: "";
+  grid-area: 1/1;
+  margin: 2px;
+  border: inherit;
+  border-right-color: #60a5fa;
+  border-radius: 50%;
+  animation: l15 3s infinite;
+}
+.loader::after {
+  margin: 8px;
+  animation-duration: 4s;
+  border-right-color: #93c5fd;
+
+}
+@keyframes l15{ 
+  100%{transform: rotate(1turn)}
+}

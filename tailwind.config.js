@@ -1,13 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}"
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'sans-serif'], 
+        sans: ['Inter', 'sans-serif'],
       },
       boxShadow: {
         xs: '0px 2px 8px 0px rgba(74, 85, 120, 0.12)',
@@ -21,5 +18,3 @@ module.exports = {
   },
   plugins: [],
 };
-
-
