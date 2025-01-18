@@ -3,6 +3,7 @@ import { ReactElement } from 'react';
 import CheckCircleIcon from 'src/assets/icons/check-circle.svg?react';
 import DownloadIcon from 'src/assets/icons/download.svg?react';
 import ExclamationTriangleIcon from 'src/assets/icons/exclamation-triangle.svg?react';
+import ExternalLinkIcon from 'src/assets/icons/external-link.svg?react';
 import ImagePlusIcon from 'src/assets/icons/image-plus.svg?react';
 import InfoCircleIcon from 'src/assets/icons/info-circle.svg?react';
 import PhotoIcon from 'src/assets/icons/photo.svg?react';
@@ -22,6 +23,7 @@ export type IconVariant =
   | 'check-circle'
   | 'download'
   | 'exclamation-triangle'
+  | 'external-link'
   | 'image-plus'
   | 'info-circle'
   | 'photo'
@@ -45,6 +47,8 @@ const Icon = ({ variant, size = 'medium', style, className }: IconProps): ReactE
       return <DownloadIcon width={possibleSizes[size]} style={style} className={className} />;
     case 'exclamation-triangle':
       return <ExclamationTriangleIcon width={possibleSizes[size]} style={style} className={className} />;
+    case 'external-link':
+      return <ExternalLinkIcon width={possibleSizes[size]} style={style} className={className} />;
     case 'image-plus':
       return <ImagePlusIcon width={possibleSizes[size]} style={style} className={className} />;
     case 'info-circle':

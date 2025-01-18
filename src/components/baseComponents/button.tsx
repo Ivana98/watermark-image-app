@@ -7,6 +7,7 @@ export type ButtonProps = {
   size?: ButtonSize;
   IconVariant?: IconVariant;
   iconSize?: IconSize;
+  iconPosition?: ButtonPosition;
   fullWidth?: boolean;
   text?: string;
   onClick?: (event?: MouseEvent) => void;
@@ -14,6 +15,7 @@ export type ButtonProps = {
 
 type ButtonVariant = 'filled' | 'outline' | 'text' | 'icon';
 type ButtonSize = 'small' | 'medium' | 'large';
+type ButtonPosition = 'left' | 'right';
 
 const buttonSizeStyle: Record<ButtonSize, string> = {
   small: 'h-6 p-1.5 rounded-md',
@@ -35,7 +37,7 @@ const buttonClasses: Record<ButtonVariant, string> = {
     disabled:border-zinc-200 disabled:text-zinc-400
     `,
   text: `
-    text-blue-400 font-semibold hover:text-blue-600 focus-visible:text-blue-600
+    text-blue-400 font-semibold underline hover:text-blue-600 focus-visible:text-blue-600
     disabled:text-zinc-400
     `,
   icon: `
@@ -57,7 +59,8 @@ const Button = ({
   size = 'medium',
   IconVariant,
   text,
-  iconSize,
+  iconSize = 'medium',
+  iconPosition = 'left',
   fullWidth = false,
   onClick,
   ...htmlButtonProps
@@ -72,8 +75,9 @@ const Button = ({
         onClick?.(e);
       }}
     >
-      {IconVariant && <Icon variant={IconVariant} size={iconSize ?? size} />}
-      {text}
+      {IconVariant && iconPosition === 'left' && <Icon variant={IconVariant} size={iconSize ?? size} className='shrink-0'/>}
+      <div className="truncate min-w-0">{text} </div>
+      {IconVariant && iconPosition === 'right' && <Icon variant={IconVariant} size={iconSize ?? size} className='shrink-0' />}
     </button>
   );
 };
