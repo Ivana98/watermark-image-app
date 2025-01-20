@@ -1,13 +1,13 @@
 import { ReactElement } from 'react';
 import Button from '../baseComponents/button';
 import Divider from '../baseComponents/divider';
-import { ProcessStatus } from 'src/constants';
 import Alert from '../baseComponents/alert';
+import { ProcessStatus } from 'src/types';
 
 type DownloadSectionProps = {
-  errorMessage?: string;
-  fileName?: string;
-  fileURL?: string;
+  errorMessage: string;
+  fileName: string;
+  fileURL: string;
   status: FinishStatus;
   onAddWatermark: () => void;
 };
@@ -26,7 +26,7 @@ const DownloadSection = ({
 
   return (
     <div className="w-full h-fit flex flex-col gap-10 text-zinc-600">
-      {status === 'succeed' && fileName && (
+      {status === 'succeed' && fileName && fileURL && (
         <div className="w-full flex flex-col gap-6">
           <h3 className="w-full text-lg text-center">All done!</h3>
           <Button

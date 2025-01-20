@@ -25,6 +25,7 @@ const UploadSection = ({ onUpload }: UploadSectionProps): ReactElement => {
 
       setInvalidFormatMessage(null);
       setInvalidSizeMessage(null);
+      setSelectedFile(null);
 
       if (!validFormats.includes(file.type)) {
         const fileName = file.name.split('.')?.[1];

@@ -15,7 +15,7 @@ const Alert = ({ title, message, alertType, onClose }: AlertProps): ReactElement
   return (
     <div className="w-full px-2 py-1 flex flex-col gap-1 text-zinc-600 text-sm bg-sky-50 border border-sky-400 rounded-lg">
       <div className="flex justify-between items-center">
-        <div className="flex items-center gap-1.5 font-semibold text-blue-500">
+        <div className="flex items-center gap-1.5 font-medium text-blue-500">
           <div>
             {alertType === 'info' && <Icon variant="info-circle" size="medium" />}
             {alertType === 'error' && <Icon variant="exclamation-triangle" size="medium" />}
