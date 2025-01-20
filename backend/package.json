@@ -1,0 +1,9 @@
+{
+    "name": "my-python-project",
+    "version": "1.0.0",
+    "scripts": {
+      "start": "uvicorn app.main:app --reload",
+      "install": ".\\venv\\Scripts\\activate && pip install -r requirements.txt"
+    }
+  }
+  
