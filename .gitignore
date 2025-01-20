@@ -1,5 +1,5 @@
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,23 +7,34 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-/node_modules
-dist
-dist-ssr
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+build/
+
+# Vite cache
+.vite/
+
+# Temporary and Local Files
 *.local
-/.pnp
+.pnp/
 .pnp.js
 
 # Editor directories and files
-.vscode/*
+.vscode/
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# Environment Variables
 .env
 .env*.local
 .env.local
@@ -31,7 +42,7 @@ dist-ssr
 .env.test.local
 .env.production.local
 
-# Intellij
+# IntelliJ IDEA
 .idea/
 *.iml
 *.iws
@@ -43,5 +54,11 @@ dist-ssr
 gcm-diagnose.log
 .lh
 
-# production
-/build
+# Temporary files
+*.temp
+*.tmp
+
+# Lint/formatting cache
+.eslintcache
+.prettiercache
+
