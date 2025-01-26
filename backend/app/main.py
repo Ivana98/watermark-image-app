@@ -1,11 +1,27 @@
 from fastapi import FastAPI
+from app.controllers import uploadImageController
+from app.controllers import snsController
+from app.controllers import websocketController
+from contextlib import asynccontextmanager
+from app.aws_clients import sns_client, SNS_TOPIC_ARN, DOMAIN
 
-app = FastAPI()
 
-@app.get("/")
-async def read_root():
-    return {"message": "Hello, World!"}
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Code to run when the server is starting up
+    response = sns_client.subscribe(
+        TopicArn=SNS_TOPIC_ARN,
+        Protocol='https',
+        Endpoint=f'https://{DOMAIN}/sns-notification',
+        ReturnSubscriptionArn=True
+    )
+    print("Startup tasks complete! Server is ready to receive traffic.")
+    yield  # This is where the app will start receiving traffic
+    sns_client.unsubscribe(SubscriptionArn=response['SubscriptionArn'])
 
-@app.get("/items/{item_id}")
-async def read_item(item_id: int, q: str = None):
-    return {"item_id": item_id, "q": q}
+app = FastAPI(lifespan=lifespan)
+
+app.include_router(uploadImageController.router)
+app.include_router(snsController.router)
+app.include_router(websocketController.router)
+
