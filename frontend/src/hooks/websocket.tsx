@@ -7,13 +7,13 @@ export function useWebSocket() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const wssUrl = 'ws://localhost:8000/ws';
+  const VITE_BACKEND_APP_URL = import.meta.env.VITE_BACKEND_APP_URL;
 
   const openConnection = useCallback((imageId: string) => {
     // Prevent reopening if already open
     if (wsRef.current) return;
 
-    const ws = new WebSocket(`${wssUrl}?image_id=${imageId}`);
+    const ws = new WebSocket(`${VITE_BACKEND_APP_URL}/ws?image_id=${imageId}`);
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -26,8 +26,8 @@ export function useWebSocket() {
         const data = JSON.parse(event.data);
         if (data.error) {
           setErrorMessage(data.error);
-        } else if (data.imageUrl) {
-          setImageUrl(data.imageUrl);
+        } else if (data.presigned_url) {
+          setImageUrl(data.presigned_url);
         }
       } catch (err) {
         setErrorMessage(ERROR_MSG_PROCESSING);
@@ -45,7 +45,7 @@ export function useWebSocket() {
       setErrorMessage(ERROR_MSG_PROCESSING);
       console.error('WebSocket error:', error);
     };
-  }, []);
+  }, [VITE_BACKEND_APP_URL]);
 
   const closeConnection = useCallback(() => {
     if (wsRef.current) {

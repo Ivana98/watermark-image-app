@@ -14,3 +14,5 @@ sns_client = boto3.client("sns")
 s3_client = boto3.client("s3")
 
 DOMAIN = os.getenv("DOMAIN")
+
+FRONTEND_URL = os.getenv("FRONTEND_URL")

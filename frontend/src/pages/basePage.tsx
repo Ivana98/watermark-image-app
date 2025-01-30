@@ -9,6 +9,8 @@ import axios from 'axios';
 import { useWebSocket } from 'src/hooks/websocket';
 import { ProcessStatus } from 'src/types';
 
+const VITE_BACKEND_APP_URL = import.meta.env.VITE_BACKEND_APP_URL;
+
 const BasePage = (): ReactElement => {
   const { imageUrl, errorMessage: wsErrorMsg, openConnection, closeConnection } = useWebSocket();
   const [processStatus, setProcessStatus] = useState<ProcessStatus>(ProcessStatus.PREPARATION);
@@ -34,11 +36,16 @@ const BasePage = (): ReactElement => {
 
         // Step 1: Get presigned url
         // file_type: image/png
-        const response = await axios.get('http://localhost:8000/generate-presigned-url/', {
-          params: {
+        const response = await axios.post(
+          `${VITE_BACKEND_APP_URL}/upload-image`,
+          {
             file_type: selectedFile.type,
+            watermark_text: watermarkText,
           },
-        });
+          {
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
 
         // object_key: uploads/123e4567-e89b-12d3-a456-426614174000.jpeg
         const { url, fields, image_id } = response.data;
@@ -49,6 +56,7 @@ const BasePage = (): ReactElement => {
           formData.append(key, value as string);
         });
         formData.append('file', selectedFile);
+        formData.append('x-amz-meta-watermark-text', watermarkText);
 
         // Step 3: Upload image to S3
         await axios.post(url, formData, {

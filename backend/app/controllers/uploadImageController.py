@@ -2,16 +2,20 @@ from fastapi import APIRouter, HTTPException
 from botocore.exceptions import ClientError
 import uuid
 from app.aws_clients import s3_client, S3_BUCKET_NAME, S3_UPLOADS_PATH
+from app.models.uploadRequest import UploadRequest
 
 router = APIRouter()
 
 # Constraints
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
-ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "application/pdf"]
+ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"]
 
 
-@router.get("/upload-image")
-async def upload_image(file_type: str):
+@router.post("/upload-image")
+async def upload_image(request: UploadRequest):
+    file_type = request.file_type
+    watermark_text = request.watermark_text
+    
     if file_type not in ALLOWED_FILE_TYPES:
         raise HTTPException(status_code=400, detail="File type not allowed.")
 
@@ -29,6 +33,7 @@ async def upload_image(file_type: str):
             },
             Conditions=[
                 {"Content-Type": file_type},
+                {"x-amz-meta-watermark-text": watermark_text},  # Ensure metadata is required
                 ["content-length-range", 0, MAX_FILE_SIZE],
             ],
             ExpiresIn=3600,  # URL expires in 1 hour
