@@ -10,6 +10,7 @@ router = APIRouter()
 @router.post("/sns-notification")
 async def sns_notification(request: Request):
     # Parse the incoming notification
+    print("sns-notification")
     raw_body = await request.body()
     try:
         body = json.loads(raw_body)

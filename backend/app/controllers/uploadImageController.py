@@ -30,6 +30,7 @@ async def upload_image(request: UploadRequest):
             Key=object_key,
             Fields={
                 "Content-Type": file_type,
+                "x-amz-meta-watermark-text": watermark_text,
             },
             Conditions=[
                 {"Content-Type": file_type},

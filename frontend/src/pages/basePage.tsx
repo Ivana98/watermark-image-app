@@ -34,6 +34,8 @@ const BasePage = (): ReactElement => {
       try {
         setProcessStatus(ProcessStatus.UPLOADING_IMAGE);
 
+        console.log('VITE_BACKEND_APP_URL: ', VITE_BACKEND_APP_URL);
+
         // Step 1: Get presigned url
         // file_type: image/png
         const response = await axios.post(
@@ -56,7 +58,6 @@ const BasePage = (): ReactElement => {
           formData.append(key, value as string);
         });
         formData.append('file', selectedFile);
-        formData.append('x-amz-meta-watermark-text', watermarkText);
 
         // Step 3: Upload image to S3
         await axios.post(url, formData, {
