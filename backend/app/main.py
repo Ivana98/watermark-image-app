@@ -14,7 +14,7 @@ async def lifespan(app: FastAPI):
     response = sns_client.subscribe(
         TopicArn=SNS_TOPIC_ARN,
         Protocol='https',
-        Endpoint=f'{DOMAIN}/sns-notification',
+        Endpoint=f'{DOMAIN}/api/sns-notification',
         ReturnSubscriptionArn=True
     )
     print("Startup tasks complete! Server is ready to receive traffic.")
@@ -22,7 +22,14 @@ async def lifespan(app: FastAPI):
     sns_client.unsubscribe(SubscriptionArn=response['SubscriptionArn'])
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+  lifespan=lifespan,
+  root_path="/api"
+)
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
 
 app.include_router(uploadImageController.router)
 app.include_router(snsController.router)
