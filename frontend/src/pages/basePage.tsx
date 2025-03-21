@@ -34,8 +34,6 @@ const BasePage = (): ReactElement => {
       try {
         setProcessStatus(ProcessStatus.UPLOADING_IMAGE);
 
-        console.log('VITE_BACKEND_APP_URL: ', VITE_BACKEND_APP_URL);
-
         // Step 1: Get presigned url
         // file_type: image/png
         const response = await axios.post(
@@ -45,7 +43,7 @@ const BasePage = (): ReactElement => {
             watermark_text: watermarkText,
           },
           {
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', "ngrok-skip-browser-warning": "true" },
           }
         );
 

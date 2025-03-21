@@ -27,30 +27,25 @@ app = FastAPI(
   root_path="/api"
 )
 
-@app.get("/health")
-async def health():
-    return {"status": "ok"}
+print(f"origin: {[FRONTEND_URL, DOMAIN]}")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[FRONTEND_URL, DOMAIN],
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
 
 app.include_router(uploadImageController.router)
 app.include_router(snsController.router)
 app.include_router(websocketController.router)
 
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
 # origins = [
 #     "http://localhost:5173",                    # React frontend
 #     "https://nearly-wanted-ape.ngrok-free.app"  # ngrok public URL
 # ]
-
-# origins = [FRONTEND_URL, DOMAIN]
-
-# print(f"FRONTEND_URL: {repr(os.getenv("FRONTEND_URL"))}")
-# print(f"DOMAIN: {repr(os.getenv("DOMAIN"))}")
-
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[FRONTEND_URL, DOMAIN],
-    # allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
-    allow_headers=["*"],  # Allow all headers
-)

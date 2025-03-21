@@ -9,47 +9,48 @@ from starlette.websockets import WebSocketDisconnect
 async def process_message(message_json, active_connections):
     try:
         message = json.loads(message_json)
-    except json.JSONDecodeError:
-        response = {"error": "Invalid json format"}
-        # await websocket.send_json(response)
-        return
+    
+        if message.get("Records") is None:
+            if message.get("status") == 'failed':
+                error_msg = f"{message.get("error", "")} for {message.get("object_key", "unknown object_key")}"
+                print(f"error: {error_msg}")
+                return { "status": 'failed', "error": error_msg}
+            return { "status": 'failed', "error": "Unexpected SNS message body."}
+            
+        object_key = (
+            message.get("Records", [{}])[0]
+            .get("s3", {})
+            .get("object", {})
+            .get("key")
+        )
+        image_id = Path(object_key).stem
+        file_type = Path(object_key).suffix
 
-    object_key = message["Records"][0]["s3"]["object"]["key"]
-    image_id = Path(object_key).stem
-    file_type = Path(object_key).suffix
+        print("processing message")
 
-    # image_id = message.get("image-id")
-    print("processing message")
-    print(f"object_key: {object_key}")
+        if image_id in active_connections:
+            websocket: WebSocket = active_connections[image_id]
 
-    if image_id in active_connections:
-        websocket: WebSocket = active_connections[image_id]
+            print(f"image_id: {image_id}")
+            print(f"active_connections: {active_connections}")
 
-        print(f"image_id: {image_id}")
-        print(f"active_connections: {active_connections}")
-
-        try:
             presigned_url = generate_processed_image_presigned_url(image_id, file_type)
             response = {"presigned_url": presigned_url}
 
-            # print(f"presigned_url: {presigned_url}")
             print(f"WebSocket State before sending: {websocket.client_state}")
             if not isinstance(websocket, WebSocket):
-                print(f"Invalid WebSocket instance for {image_id}: {type(websocket)}")
-                return
+                return { "status": 'failed', "error": f"Invalid WebSocket instance for {image_id}: {type(websocket)}"}
 
             await websocket.send_json(response)
-            # elif status == "error":
-            #     error_message = message.get("error_message", "Process message error")
-            #     response = {"error": error_message}
-            #     await websocket.send_json(response)
+            return { "status": 'success' }
+        else:
+            { "status": 'failed', "error": f"Image id {image_id} is not present in active connections."}
 
-        except Exception as e:
-            print(f"Exception {e}")
-        finally:
-            # if websocket.client_state == WebSocketState.CONNECTED:
-            #     await websocket.close()
-            active_connections.pop(image_id, None)
+    except Exception as e:
+        print(f"Exception {e}")
+        return { "status": 'failed', "error": "Exception while processing the message."}
+    finally:
+        active_connections.pop(image_id, None)
 
 
 def generate_processed_image_presigned_url(image_id, file_type):

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, HTTPException
 import json
 from app.aws_clients import sns_client
 from app.utils.helper import process_message
@@ -15,7 +15,7 @@ async def sns_notification(request: Request):
     try:
         body = json.loads(raw_body)
     except json.JSONDecodeError:
-        return {"error": "Invalid JSON format"}
+        raise HTTPException(status_code=400, detail="Invalid JSON format")
 
     # Handle SNS Subscription Confirmation
     if body.get("Type") == "SubscriptionConfirmation":
@@ -26,6 +26,8 @@ async def sns_notification(request: Request):
 
     # Handle SNS Notification
     if body.get("Type") == "Notification":
-        await process_message(body["Message"], active_connections)
-
+        response = await process_message(body["Message"], active_connections)
+        if response.get("status") == "failed":
+            raise HTTPException(status_code=400, detail=f"{response.get("error", "")}")
+            
     return {"message": "Notification processed"}
