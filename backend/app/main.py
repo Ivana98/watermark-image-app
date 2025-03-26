@@ -1,51 +1,53 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks
+from contextlib import asynccontextmanager
+from fastapi.middleware.cors import CORSMiddleware
+import asyncio
 from app.controllers import uploadImageController
 from app.controllers import snsController
-from app.controllers import websocketController
-from contextlib import asynccontextmanager
+from app.controllers import eventController
+from app.controllers import downloadImageController
+from app.utils.helper import get_subscription_arn_for_endpoint
 from app.aws_clients import sns_client, SNS_TOPIC_ARN, DOMAIN, FRONTEND_URL
-from fastapi.middleware.cors import CORSMiddleware
-import os
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Code to run when the server is starting up
-    response = sns_client.subscribe(
-        TopicArn=SNS_TOPIC_ARN,
-        Protocol='https',
-        Endpoint=f'{DOMAIN}/api/sns-notification',
-        ReturnSubscriptionArn=True
-    )
-    print("Startup tasks complete! Server is ready to receive traffic.")
+    asyncio.create_task(sns_subscription_task())
     yield  # This is where the app will start receiving traffic
-    sns_client.unsubscribe(SubscriptionArn=response['SubscriptionArn'])
+    # Code to run on server shutdown
 
 
-app = FastAPI(
-  lifespan=lifespan,
-  root_path="/api"
-)
-
-print(f"origin: {[FRONTEND_URL, DOMAIN]}")
+app = FastAPI(lifespan=lifespan, root_path="/api")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_URL, DOMAIN],
+    allow_origins=set([FRONTEND_URL, DOMAIN]),
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-app.include_router(uploadImageController.router)
 app.include_router(snsController.router)
-app.include_router(websocketController.router)
+app.include_router(uploadImageController.router)
+app.include_router(eventController.router)
+app.include_router(downloadImageController.router)
+
 
 @app.get("/health")
 async def health():
     return {"status": "ok"}
 
-# origins = [
-#     "http://localhost:5173",                    # React frontend
-#     "https://nearly-wanted-ape.ngrok-free.app"  # ngrok public URL
-# ]
+
+async def sns_subscription_task():
+    app.state.subscriptionArn = get_subscription_arn_for_endpoint(
+        SNS_TOPIC_ARN, f"{DOMAIN}/api/sns-notification"
+    )
+
+    if app.state.subscriptionArn == None:
+        app.state.subscriptionArn = sns_client.subscribe(
+            TopicArn=SNS_TOPIC_ARN,
+            Protocol="https",
+            Endpoint=f"{DOMAIN}/api/sns-notification",
+            ReturnSubscriptionArn=True,
+        )["SubscriptionArn"]

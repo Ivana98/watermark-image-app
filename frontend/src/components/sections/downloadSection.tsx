@@ -1,8 +1,10 @@
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import Button from '../baseComponents/button';
 import Divider from '../baseComponents/divider';
 import Alert from '../baseComponents/alert';
-import { ProcessStatus } from 'src/types';
+import { FinishStatus } from 'src/types';
+import axios from 'axios';
+import { ERROR_MSG_DOWNLOAD, RESPONSE_TIMEOUT } from 'src/constants';
 
 type DownloadSectionProps = {
   errorMessage: string;
@@ -11,17 +13,46 @@ type DownloadSectionProps = {
   status: FinishStatus;
   onAddWatermark: () => void;
 };
-type FinishStatus = ProcessStatus.PROCESSING_FAILED | ProcessStatus.PROCESSING_FINISHED;
+
+const VITE_BACKEND_APP_URL = import.meta.env.VITE_BACKEND_APP_URL;
 
 const DownloadSection = ({
   errorMessage,
   fileName,
   fileURL,
   status,
-  onAddWatermark
+  onAddWatermark,
 }: DownloadSectionProps): ReactElement => {
+  const [hasDownloadError, setHasDownloadError] = useState(false);
+
   const handleOpenImage = () => {
     if (fileURL) window.open(fileURL, '_blank');
+  };
+
+  const handleDownloadImage = async () => {
+    if (fileURL && fileName) {
+      try {
+        setHasDownloadError(false);
+
+        const response = await axios.get(`${VITE_BACKEND_APP_URL}/download-image/${fileName}`, {
+          responseType: 'blob',
+          timeout: RESPONSE_TIMEOUT,
+        });
+
+        if (response) {
+          const link = document.createElement('a');
+          const url = window.URL.createObjectURL(response.data);
+          link.href = url;
+          link.setAttribute('download', fileName);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      } catch (error) {
+        console.error('Error while downloading image:', error);
+        setHasDownloadError(true);
+      }
+    }
   };
 
   return (
@@ -31,24 +62,24 @@ const DownloadSection = ({
           <h3 className="w-full text-lg text-center">All done!</h3>
           <Button
             variant="text"
-            text={fileName}
+            text="Open watermarked image in new tab"
             IconVariant="external-link"
             iconPosition="right"
             onClick={handleOpenImage}
           />
           <div className="flex justify-center">
-            <Button
-              variant="filled"
-              text="Download your image!"
-              IconVariant="download"
-              onClick={() => console.log('')}
-            />
+            <Button variant="filled" text="Download your image!" IconVariant="download" onClick={handleDownloadImage} />
           </div>
+          {hasDownloadError && (
+            <div>
+              <Alert alertType="error" title="Failed to download image" message={ERROR_MSG_DOWNLOAD} />
+            </div>
+          )}
         </div>
       )}
       {status === 'failed' && errorMessage && (
         <div>
-          <Alert alertType="error" title='Failed to process image' message={errorMessage} />
+          <Alert alertType="error" title="Failed to process image" message={errorMessage} />
         </div>
       )}
       <Divider />

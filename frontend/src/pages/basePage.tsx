@@ -1,22 +1,25 @@
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import Header from 'src/components/baseComponents/header';
 import Section from 'src/components/baseComponents/section';
 import DownloadSection from 'src/components/sections/downloadSection';
 import LoadingSection from 'src/components/sections/loadingSection';
 import UploadSection from 'src/components/sections/uploadSection';
-import { ERROR_MSG_UPLOAD } from 'src/constants';
+import { ERROR_MSG_PROCESSING, ERROR_MSG_UPLOAD, RESPONSE_TIMEOUT } from 'src/constants';
 import axios from 'axios';
-import { useWebSocket } from 'src/hooks/websocket';
 import { ProcessStatus } from 'src/types';
+import { useImageEventSource } from 'src/hooks/useImageEventSource';
 
 const VITE_BACKEND_APP_URL = import.meta.env.VITE_BACKEND_APP_URL;
 
 const BasePage = (): ReactElement => {
-  const { imageUrl, errorMessage: wsErrorMsg, openConnection, closeConnection } = useWebSocket();
+  const { openConnection, closeConnection, eventMessage } = useImageEventSource();
+
   const [processStatus, setProcessStatus] = useState<ProcessStatus>(ProcessStatus.PREPARATION);
+  const processStatusRef = useRef<ProcessStatus>(ProcessStatus.PREPARATION);
 
   const [imageId, setImageId] = useState<string>('');
   const [fileType, setFileType] = useState<string>('');
+  const [downloadImageUrl, setDownloadImageUrl] = useState('');
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   const startProcessingImage = useCallback(
@@ -34,8 +37,7 @@ const BasePage = (): ReactElement => {
       try {
         setProcessStatus(ProcessStatus.UPLOADING_IMAGE);
 
-        // Step 1: Get presigned url
-        // file_type: image/png
+        // Get presigned url
         const response = await axios.post(
           `${VITE_BACKEND_APP_URL}/upload-image`,
           {
@@ -43,23 +45,24 @@ const BasePage = (): ReactElement => {
             watermark_text: watermarkText,
           },
           {
-            headers: { 'Content-Type': 'application/json', "ngrok-skip-browser-warning": "true" },
+            headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+            timeout: RESPONSE_TIMEOUT,
           }
         );
 
-        // object_key: uploads/123e4567-e89b-12d3-a456-426614174000.jpeg
         const { url, fields, image_id } = response.data;
 
-        // Step 2: Create FormData and include constraint fields and file
+        // Create FormData and include constraint fields and file
         const formData = new FormData();
         Object.entries(fields).forEach(([key, value]) => {
           formData.append(key, value as string);
         });
         formData.append('file', selectedFile);
 
-        // Step 3: Upload image to S3
+        // Upload image to S3
         await axios.post(url, formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
+          timeout: RESPONSE_TIMEOUT,
         });
 
         setImageId(image_id);
@@ -76,21 +79,40 @@ const BasePage = (): ReactElement => {
   );
 
   useEffect(() => {
-    if (imageUrl || wsErrorMsg) {
-      if (wsErrorMsg) {
-        setErrorMessage(wsErrorMsg);
+    if (eventMessage) {
+      if (eventMessage.status === 'failed') {
+        setErrorMessage(eventMessage.error);
         setProcessStatus(ProcessStatus.PROCESSING_FAILED);
       } else {
+        setDownloadImageUrl(eventMessage.presigned_url);
         setProcessStatus(ProcessStatus.PROCESSING_FINISHED);
       }
       closeConnection();
     }
-  }, [closeConnection, imageUrl, wsErrorMsg]);
+  }, [closeConnection, eventMessage]);
+
+  useEffect(() => {
+    processStatusRef.current = processStatus;
+  }, [processStatus]);
+
+  useEffect(() => {
+    if (processStatus === ProcessStatus.PROCESSING_IMAGE) {
+      setTimeout(() => {
+        if (processStatusRef.current === ProcessStatus.PROCESSING_IMAGE) {
+          setErrorMessage(ERROR_MSG_PROCESSING);
+          setProcessStatus(ProcessStatus.PROCESSING_FAILED);
+
+          closeConnection();
+        }
+      }, RESPONSE_TIMEOUT);
+    }
+  }, [closeConnection, processStatus]);
 
   const onAddWatermarkToMoreImages = useCallback(() => {
     setImageId('');
     setFileType('');
     setErrorMessage('');
+    setDownloadImageUrl('');
 
     setProcessStatus(ProcessStatus.PREPARATION);
   }, []);
@@ -110,7 +132,7 @@ const BasePage = (): ReactElement => {
                 <DownloadSection
                   status={processStatus}
                   fileName={`${imageId}.${fileType}`}
-                  fileURL={imageUrl}
+                  fileURL={downloadImageUrl}
                   errorMessage={errorMessage}
                   onAddWatermark={onAddWatermarkToMoreImages}
                 />

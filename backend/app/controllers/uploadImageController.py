@@ -24,7 +24,6 @@ async def upload_image(request: UploadRequest):
     file_extension = file_type.split("/")[-1]
     object_key = f"{S3_UPLOADS_PATH}/{unique_id}.{file_extension}"
 
-    print(f"S3_BUCKET_NAME: {S3_BUCKET_NAME}")
     try:
         response = s3_client.generate_presigned_post(
             Bucket=S3_BUCKET_NAME,
@@ -46,4 +45,5 @@ async def upload_image(request: UploadRequest):
             "image_id": unique_id,
         }
     except ClientError as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"upload_image exception: {e}")
+        raise HTTPException(status_code=500, detail="Error while generating presigned url")

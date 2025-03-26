@@ -1,2 +1,4 @@
-# Store active WebSocket connections by image ID
-active_connections = {}
+import asyncio
+from typing import Dict
+
+active_connections: Dict[str, asyncio.Queue] = {}
