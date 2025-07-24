@@ -9,18 +9,20 @@ ENV VITE_BACKEND_APP_URL=${VITE_BACKEND_APP_URL}
 WORKDIR /app
 
 # Copy package.json and package-lock.json for better caching
-# COPY package.json package-lock.json ./ # Deleted package-lock.json because of Nexus Repository Manager
-COPY package.json ./
+COPY package.json package-lock.json ./ 
+# Deleted package-lock.json because of Nexus Repository Manager
+# COPY package.json ./
 
 # Clean npm cache
 RUN npm cache clean --force
 
 # Remove any existing node_modules to prevent conflicts
-RUN rm -rf node_modules package-lock.json
+# RUN rm -rf node_modules package-lock.json
 
 # Install dependencies
-# RUN npm ci --no-audit --no-fund # Works only with package-lock.json
-RUN npm i --no-audit --no-fund
+# Works only with package-lock.json
+RUN npm ci --no-audit --no-fund 
+# RUN npm i --no-audit --no-fund
 
 # Copy the rest of the application code
 COPY . .
