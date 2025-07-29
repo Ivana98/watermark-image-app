@@ -9,7 +9,7 @@ import axios from 'axios';
 import { ProcessStatus } from 'src/types';
 import { useImageEventSource } from 'src/hooks/useImageEventSource';
 
-const VITE_BACKEND_APP_URL = import.meta.env.VITE_BACKEND_APP_URL;
+const BACKEND_APP_URL = import.meta.env.BACKEND_APP_URL;
 
 const BasePage = (): ReactElement => {
   const { openConnection, closeConnection, eventMessage } = useImageEventSource();
@@ -39,7 +39,7 @@ const BasePage = (): ReactElement => {
 
         // Get presigned url
         const response = await axios.post(
-          `${VITE_BACKEND_APP_URL}/upload-image`,
+          `${BACKEND_APP_URL}/upload-image`,
           {
             file_type: selectedFile.type,
             watermark_text: watermarkText,

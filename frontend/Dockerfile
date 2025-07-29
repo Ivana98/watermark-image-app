@@ -2,8 +2,8 @@
 FROM node:22-alpine AS builder
 
 # Set the environment variables needed for building the frontend
-ARG VITE_BACKEND_APP_URL
-ENV VITE_BACKEND_APP_URL=${VITE_BACKEND_APP_URL}
+ARG BACKEND_APP_URL
+ENV BACKEND_APP_URL=${BACKEND_APP_URL}
 
 # Set the working directory inside the container
 WORKDIR /app

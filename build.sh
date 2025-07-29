@@ -36,7 +36,7 @@ docker build \
 # Build the frontend image with the required build argument
 echo "Building frontend image..."
 docker build \
-    --build-arg VITE_BACKEND_APP_URL="https://${DOMAIN_NAME}/api" \
+    --build-arg BACKEND_APP_URL="https://${DOMAIN_NAME}/api" \
     -t "${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/watermarky-dev-fe" \
     frontend
 

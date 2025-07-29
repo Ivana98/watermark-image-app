@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { ImageEventData } from 'src/types';
 
-const VITE_BACKEND_APP_URL = import.meta.env.VITE_BACKEND_APP_URL;
+const BACKEND_APP_URL = import.meta.env.BACKEND_APP_URL;
 
 export function useImageEventSource() {
   const eventSourceRef = useRef(null);
@@ -25,7 +25,7 @@ export function useImageEventSource() {
       // Close previous EventSource if exists
       closeConnection();
 
-      const eventSource = new EventSource(`${VITE_BACKEND_APP_URL}/events/${imageId}`);
+      const eventSource = new EventSource(`${BACKEND_APP_URL}/events/${imageId}`);
       eventSourceRef.current = eventSource;
       currentImageIdRef.current = imageId;
 
