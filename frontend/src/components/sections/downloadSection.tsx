@@ -14,7 +14,7 @@ type DownloadSectionProps = {
   onAddWatermark: () => void;
 };
 
-const BACKEND_APP_URL = import.meta.env.BACKEND_APP_URL;
+const VITE_BACKEND_APP_URL = import.meta.env.VITE_BACKEND_APP_URL;
 
 const DownloadSection = ({
   errorMessage,
@@ -34,7 +34,7 @@ const DownloadSection = ({
       try {
         setHasDownloadError(false);
 
-        const response = await axios.get(`${BACKEND_APP_URL}/download-image/${fileName}`, {
+        const response = await axios.get(`${VITE_BACKEND_APP_URL}/download-image/${fileName}`, {
           responseType: 'blob',
           timeout: RESPONSE_TIMEOUT,
         });
