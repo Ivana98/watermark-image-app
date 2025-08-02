@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Request, Response
 from botocore.exceptions import ClientError
-from app.aws_clients import s3_client, S3_BUCKET_NAME, S3_PROCESSED_PATH
+from app.core.aws_clients import s3_client, S3_BUCKET_NAME, S3_PROCESSED_PATH
 
 router = APIRouter()
 

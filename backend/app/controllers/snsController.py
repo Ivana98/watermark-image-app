@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, HTTPException
 import json
-from app.aws_clients import sns_client
+from app.core.aws_clients import sns_client
 from app.utils.helper import process_message
 
 router = APIRouter()

@@ -6,8 +6,9 @@ from app.controllers import uploadImageController
 from app.controllers import snsController
 from app.controllers import eventController
 from app.controllers import downloadImageController
+from app.controllers import healthController
 from app.utils.helper import get_subscription_arn_for_endpoint
-from app.aws_clients import sns_client, SNS_TOPIC_ARN, DOMAIN, FRONTEND_URL
+from app.core.aws_clients import sns_client, SNS_TOPIC_ARN, DOMAIN, FRONTEND_URL
 
 
 @asynccontextmanager
@@ -32,11 +33,7 @@ app.include_router(snsController.router)
 app.include_router(uploadImageController.router)
 app.include_router(eventController.router)
 app.include_router(downloadImageController.router)
-
-
-@app.get("/health")
-async def health():
-    return {"status": "ok"}
+app.include_router(healthController.router)
 
 
 async def sns_subscription_task():

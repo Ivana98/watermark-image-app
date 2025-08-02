@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request
-from app.state import active_connections
+from app.core.state import active_connections
 import asyncio
 import json
 from sse_starlette.sse import EventSourceResponse

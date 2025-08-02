@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
-from app.aws_clients import s3_client, sns_client, S3_BUCKET_NAME, S3_PROCESSED_PATH
-from app.state import active_connections
+from app.core.aws_clients import s3_client, sns_client, S3_BUCKET_NAME, S3_PROCESSED_PATH
+from app.core.state import active_connections
 
 
 async def process_message(message_json):

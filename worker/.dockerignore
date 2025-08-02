@@ -1,0 +1,32 @@
+# Python cache and compiled files
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Docker-related files
+Dockerfile
+
+# Environment & config files
+.env
+*.log
+
+# IDE / editor configs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build artifacts
+*.egg-info/
+dist/
+build/
+
+# OS-specific
+.DS_Store
+Thumbs.db

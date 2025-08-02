@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from botocore.exceptions import ClientError
 import uuid
-from app.aws_clients import s3_client, S3_BUCKET_NAME, S3_UPLOADS_PATH
+from app.core.aws_clients import s3_client, S3_BUCKET_NAME, S3_UPLOADS_PATH
 from app.models.uploadRequest import UploadRequest
 
 router = APIRouter()
