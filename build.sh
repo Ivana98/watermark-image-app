@@ -18,11 +18,13 @@ echo "AWS Account: $AWS_ACCOUNT"
 echo "Logging in to AWS ECR in ${AWS_REGION}..."
 aws ecr get-login-password | docker login --username AWS --password-stdin "${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-# Retrieve the domain name from Terraform output in the infra directory
-echo "Retrieving domain name from Terraform output..."
-DOMAIN_NAME=$(terraform -chdir=infra output -raw domain_name)
+echo "Retrieving domain name..."
+# Use this to retrieve the domain name from Terraform output in the infrastructure directory
+# DOMAIN_NAME=$(terraform -chdir=infra output -raw domain_name)
+DOMAIN_NAME="$1"
 if [ -z "$DOMAIN_NAME" ]; then
-    echo "Failed to retrieve the domain name from Terraform output."
+    # echo "Failed to retrieve the domain name from Terraform output."
+    echo "Domain name is not passed as argument."
     exit 1
 fi
 echo "Domain Name: $DOMAIN_NAME"
