@@ -57,7 +57,7 @@ const DragAndDropSection = ({ handleFileChanged }: DragAndDropSectionProps): Rea
             id="file-input"
             type="file"
             className="hidden"
-            accept=".jpeg, .png, .webp"
+            accept=".jpg, .jpeg, .png, .webp"
             onChange={handleButtonClicked}
           />
         </div>
