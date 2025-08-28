@@ -7,7 +7,7 @@ from app.controllers import snsController
 from app.controllers import eventController
 from app.controllers import downloadImageController
 from app.controllers import healthController
-from app.utils.helper import get_subscription_arn_for_endpoint
+from app.utils.helper import get_subscription_info
 from app.core.aws_clients import sns_client, SNS_TOPIC_ARN, DOMAIN, FRONTEND_URL
 
 
@@ -37,11 +37,19 @@ app.include_router(healthController.router)
 
 
 async def sns_subscription_task():
-    app.state.subscriptionArn = get_subscription_arn_for_endpoint(
+    subscription_arn, confirmation_status = get_subscription_info(
         SNS_TOPIC_ARN, f"{DOMAIN}/api/sns-notification"
     )
 
-    if app.state.subscriptionArn == None:
+    if subscription_arn and confirmation_status == True:
+        app.state.subscriptionArn = subscription_arn
+    else:
+        # Unsubscribe if pending or broken
+        if subscription_arn and confirmation_status != True:
+            print(f"Unsubscribing from sns topic; subscription arn: {subscription_arn}")
+            sns_client.unsubscribe(SubscriptionArn=subscription_arn)
+
+        print("Subscribing for sns topic")
         app.state.subscriptionArn = sns_client.subscribe(
             TopicArn=SNS_TOPIC_ARN,
             Protocol="https",

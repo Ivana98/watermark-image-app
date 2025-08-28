@@ -1,6 +1,11 @@
 import json
 from pathlib import Path
-from app.core.aws_clients import s3_client, sns_client, S3_BUCKET_NAME, S3_PROCESSED_PATH
+from app.core.aws_clients import (
+    s3_client,
+    sns_client,
+    S3_BUCKET_NAME,
+    S3_PROCESSED_PATH,
+)
 from app.core.state import active_connections
 
 
@@ -66,15 +71,28 @@ def generate_processed_image_presigned_url(image_id, file_type):
         )
         return presigned_url
     except Exception as e:
-        print(f"generate_processed_image_presigned_url Error generating presigned URL: {e}")
+        print(
+            f"generate_processed_image_presigned_url Error generating presigned URL: {e}"
+        )
         return None
-    
-    
-def get_subscription_arn_for_endpoint(topic_arn, endpoint):
-    paginator = sns_client.get_paginator("list_subscriptions_by_topic")
 
-    for page in paginator.paginate(TopicArn=topic_arn):
-        for sub in page["Subscriptions"]:
-            if sub["Endpoint"] == endpoint:
-                return sub["SubscriptionArn"]
-    return None
+
+def get_subscription_info(topic_arn, endpoint):
+    try:
+        paginator = sns_client.get_paginator("list_subscriptions_by_topic")
+
+        for page in paginator.paginate(TopicArn=topic_arn):
+            for sub in page["Subscriptions"]:
+                if sub["Endpoint"] == endpoint:
+                    arn = sub["SubscriptionArn"]
+
+                    attrs = sns_client.get_subscription_attributes(SubscriptionArn=arn)
+                    confirmation_status = attrs["Attributes"].get(
+                        "PendingConfirmation", "false"
+                    )
+
+                    return arn, confirmation_status == "true"
+        return None, False
+    except Exception as e:
+        print(f"get_subscription_info Error generating subscription info: {e}")
+        return None, False
