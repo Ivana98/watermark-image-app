@@ -150,7 +150,7 @@ def poll_sqs():
             response = sqs_client.receive_message(
                 QueueUrl=SQS_QUEUE_URL,
                 MaxNumberOfMessages=5,
-                WaitTimeSeconds=20,  # Long pooling - wait up to 20s for new messages before returning
+                WaitTimeSeconds=20,  # Long polling - wait up to 20s for new messages before returning
             )
 
             if "Messages" in response:

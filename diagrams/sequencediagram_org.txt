@@ -1,0 +1,102 @@
+actor User
+participant Frontend
+participant ALB
+participant Backend
+participant S3
+participant SQS
+participant Worker
+participant SNS
+
+entryspacing 1.1
+activate User
+activate Frontend
+#activate Worker
+User->Frontend:uploads photo
+User->Frontend:inserts watermark text
+User->Frontend:clicks on upload button
+Frontend->ALB:POST /api/upload-image (HTTPS)
+activate ALB
+ALB->Backend:POST /api/upload-image (HTTP)
+activate Backend
+Backend->Backend:generate_presigned_post()
+ALB<--Backend:success (presigned url for upload)
+deactivate Backend
+Frontend<--ALB:success (presigned url for upload)
+deactivate ALB
+
+Frontend->S3:POST presigned url
+activate S3
+S3-->Frontend:success
+parallel 
+Frontend->ALB:GET /api/events/{image_id} (HTTPS)
+activate ALB
+S3->SQS:ObjectCreated event (/uploads)
+parallel off
+activate SQS
+deactivate S3
+
+ALB->Backend:GET /api/events/{image-id} (HTTP)
+activate Backend
+Backend-->ALB: success (SSE stream)
+ALB-->Frontend: success (SSE stream)
+
+activate Worker
+loop while True
+Worker->SQS:receive_message()
+SQS-->Worker:success (messages)
+
+opt If there are messages to process
+loop i<5
+
+Worker->S3:get_object()
+activate S3
+Worker<--S3:success (image)
+deactivate S3
+
+Worker->Worker:process image
+
+Worker->S3:put_object()
+activate S3
+Worker<--S3:success
+S3->SNS:ObjectCreated event (/processed)
+deactivate S3
+activate SNS
+Worker->SQS:delete_message()
+
+end
+end
+
+end
+
+deactivate Worker
+deactivate SQS
+
+SNS->Backend:POST /api/sns-notification
+deactivate SNS 
+
+Backend->Backend: generate_presigned_url()
+Backend-->ALB: presigned url (SSE stream)
+deactivate Backend
+ALB-->Frontend: presigned url (SSE stream)
+deactivate ALB
+
+User->Frontend: clicks open image in another tab
+Frontend->Frontend: browser opens image in another tab
+
+User->Frontend: clicks download your image button
+
+Frontend->ALB:GET /api/download-image/{image_name} (HTTPS)
+activate ALB
+ALB->Backend:GET /api/download-image/{image_name} (HTTP)
+activate Backend
+Backend->S3:get_object()
+activate S3
+Backend<--S3:success (image_object)
+deactivate S3
+ALB<--Backend:success (return image)
+deactivate Backend
+Frontend<--ALB:success (return image)
+deactivate ALB
+Frontend->Frontend:browser triggers download image
+deactivate Frontend
+deactivate User
