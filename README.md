@@ -46,10 +46,10 @@ npm run start            # Start development server
 
 ```bash
 cd backend
-python -m venv venv                # Create a virtual environment
-.\venv\Scripts\activate            # Activate virtual environment (On Windows)
-# or source venv/bin/activate      # Activate virtual environment (Linux/macOS)
-pip install -r requirements.txt    # Install dependencies
+python -m venv venv                       # Create a virtual environment
+.\venv\Scripts\activate                   # Activate virtual environment (On Windows)
+# or source venv/bin/activate             # Activate virtual environment (Linux/macOS)
+pip install -r requirements.txt           # Install dependencies
 uvicorn app.main:app --reload --port 8000 # Run the FastAPI app
 ```
 
