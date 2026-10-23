@@ -16,7 +16,7 @@ This repository contains a cloud-native application for watermarking images usin
 
 2. **Environment Variables**  
    Each app requires its own `.env` file with appropriate variables.  
-   Copy the content of `.env.template` file in each app's folder and fill in the necessary values
+   Copy the content of `.env.template` file in each app's folder and fill in the necessary values.
 
 ---
 
@@ -77,17 +77,99 @@ python worker.py                   # Start the worker script
 
 ---
 
-## Steps to Build and Deploy Application's Docker Containers to AWS ECR:
+## Steps to run application on AWS sandbox
 
-Before running the build script, make sure you have configured your AWS CLI profile:
+### 1. Start AWS Sandbox
+
+1. Log in to [Pluralsight](https://app.pluralsight.com/).
+2. Start an **AWS Sandbox** environment.
+
+### 2. Configure AWS CLI Profile
+
+Open your terminal (Bash, WSL, or Git Bash) and configure a named AWS CLI profile:
 
 ```bash
-aws configure --profile myawsprofile
+aws configure --profile acg
 ```
 
-#### Steps to Run:
+Enter the following values when prompted:
 
-To build and push Docker images to ECR, run:
+- **AWS Access Key ID:** Access Key ID provided in sandbox.
+- **AWS Secret Access Key:** Secret Access Key provided in sandbox.
+- **Default region name:** `us-east-1`
+- **Default output format:** `json`
+
+> **Note:** If working on Windows OS, export the AWS profile to ensure all subsequent AWS CLI and Terraform commands use the correct credentials.
+> This environment variable applies only to the current terminal session. Run the command again when opening a new terminal.
+
 ```bash
-./build.sh
+export AWS_PROFILE=acg
 ```
+
+### 3. Clean Up Previous Terraform Files
+
+Navigate to the `infrastructure` project directory.
+
+If the project was previously initialized against another AWS Sandbox, remove the old Terraform initialization files.
+
+#### Files that can be safely removed:
+
+- `.terraform/` — Directory containing downloaded providers, modules, and cached backend configuration. Terraform recreates it during initialization.
+
+Remove the directory using:
+
+```bash
+rm -rf .terraform/
+```
+
+#### Files that can be removed conditionally (files that contain Terraform state and should be removed when starting with a new sandbox):
+
+- `terraform.tfstate` — Local Terraform state file.
+- `terraform.tfstate.backup` — Backup of the previous Terraform state.
+- `terraform.tfstate.d/` — Local state files for additional Terraform workspaces, if used.
+
+> **Important:**
+> - Do not delete Terraform configuration files (`*.tf`, `*.tfvars`).
+> - Keep `.terraform.lock.hcl` because it maintains consistent Terraform provider versions.
+
+### 4. Initialize Terraform
+
+From the `infrastructure` project directory, initialize Terraform:
+
+```bash
+terraform init
+```
+
+> Alternatively, if the Terraform backend configuration has changed or you want to discard the previously cached backend configuration, you can run the "-reconfigure" option that tells Terraform to reinitialize the backend without attempting to migrate existing state: `terraform init -reconfigure`
+
+### 5. Deploy Infrastructure
+Apply the Terraform configuration to provision the required AWS resources:
+
+```bash
+terraform apply
+```
+
+> If you first want to review the changes Terraform is going to make: `terraform plan`  
+> If you want to skip the interactive approval of prompt: `terraform apply -auto-approve`
+
+### 6. Build and Push Docker Images to Amazon ECR
+
+After the infrastructure is deployed, navigate back to the project root directory containing `build.sh`.
+
+The script builds the Docker images and pushes them to **Amazon Elastic Container Registry (ECR)**.
+
+> **Note:** Ensure **Docker is installed and running** before executing the script.
+
+#### Using WSL (Windows Subsystem for Linux)
+
+```bash
+bash build.sh <domain>
+```
+
+#### Using Bash (Windows)
+
+```bash
+./build.sh <domain>
+```
+
+> **Note:** Replace `<domain>` with the domain name configured in **Amazon Route 53**, e.g. `https://134851837170.realhandsonlabs.net`.
